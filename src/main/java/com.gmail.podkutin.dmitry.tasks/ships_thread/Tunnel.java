@@ -8,9 +8,15 @@ import java.util.List;
 
 public class Tunnel {
     private final List<Ship> tunnel = new ArrayList<>(5);
+    private final int maxShipsOnTunnel;
+
+    public Tunnel(int maxShipsOnTunnel) {
+        this.maxShipsOnTunnel = maxShipsOnTunnel;
+    }
+
 
     synchronized public void add(Ship ship) {
-        while (tunnel.size() == 5) {
+        while (tunnel.size() == maxShipsOnTunnel) {
             try {
                 wait();
             } catch (InterruptedException e) {
@@ -29,14 +35,11 @@ public class Tunnel {
                 e.printStackTrace();
             }
         }
-
-        for (int i = 0; i < tunnel.size(); i++) {
-            if (tunnel.get(i).getType().equals(type)) {
-                System.out.println(Thread.currentThread().getName() + " port picks up the ship from the tunnel: ");
-                return tunnel.remove(i);
-            }
+        if (tunnel.get(0).getType().equals(type)) {
+            System.out.println(Thread.currentThread().getName() + " port picks up the ship from the tunnel: ");
+            notifyAll();
+            return tunnel.remove(0);
         }
-        notifyAll();
         return null;
     }
 }
